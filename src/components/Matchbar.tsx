@@ -38,7 +38,7 @@ const Matchbar: VoidComponent<MatchbarProps> = (props) => {
         {(person, i) => (
           <div
             classList={{
-              "text-green-500": isAuthenticated(person.name),
+              "text-success-600 dark:text-sucess-500": isAuthenticated(person.name),
             }}
           >
             {person.name} <span class="font-bold">{person.similarity}%</span>

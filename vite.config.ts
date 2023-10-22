@@ -50,7 +50,7 @@ export default defineConfig(() => {
       noExternal: ["@kobalte/core", "crypto", "@internationalized/message"],
     },
     optimizeDeps: {
-      include: ["solid-devtools/setup", "plotly.js-dist"],
+      include: ["solid-devtools/setup"],
     },
     server: {
       headers: {

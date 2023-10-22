@@ -1,5 +1,5 @@
-import type { Sample } from "@prisma/client/edge";
 import { prisma } from "./db";
+import type { GraphSample } from "./degreeOfDisorder";
 import { makeSample } from "./makeSample";
 import meanDistance from "./meanDistance";
 import { activeSamples } from "./updateActiveSamples";
@@ -10,10 +10,14 @@ export async function rank(uuid: string): Promise<Map<number, string>> {
   return new Map<number, string>();
 }
 
-async function rankBySample(sample: Sample): Promise<Map<number, string>> {
+async function rankBySample(sample: GraphSample): Promise<Map<number, string>> {
   const users = await prisma.user.findMany({
     include: {
-      samples: true,
+      samples: {
+        include: {
+          graphs: true,
+        },
+      },
     },
   });
   const userMap: Map<number, string> = new Map<number, string>();

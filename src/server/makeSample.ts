@@ -1,12 +1,17 @@
-import type { Sample } from "@prisma/client/edge";
+import type { Graph, Sample } from "@prisma/client/edge";
 
-export function makeSample(data: [number, string][]): Sample {
-  const graphs: string[] = [];
+export function makeSample(data: [number, string][]) {
+  const graphs: Graph[] = [];
   for (let i = 0; i < data.length; i++) {
     const [id, graph] = data[i];
-    graphs.push(graph);
+    graphs.push({
+      value: graph,
+    } as Graph);
   }
+  // console.log(graphs);
   return {
     graphs: graphs,
-  } as Sample;
+  } as Sample & {
+    graphs: Graph[];
+  };
 }

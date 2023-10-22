@@ -18,6 +18,19 @@ export async function updateActiveSamples(update: [string, number, number][], uu
   holdOut = holdOut.concat(update);
 
   // console.log(holdOut);
+  // execute backspaces
+  // for (let i = 1; i < update.length; i++) {
+  //   const [id, start, end] = holdOut[i];
+  //   if (id == "Backspace") {
+  //     holdOut.splice(i - 1, 2);
+  //     i -= 2;
+  //     continue;
+  //   }
+  // }
+
+  // while (holdOut[0][0] == "Backspace") {
+  //   holdOut.shift();
+  // }
 
   for (let i = graphLength - 1; i < holdOut.length; i++) {
     const [id, start, end] = holdOut[i - graphLength + 1];
@@ -36,7 +49,7 @@ export async function updateActiveSamples(update: [string, number, number][], uu
   }
 
   activeSamples.set(uuid, activeSample);
-  //console.log(activeSample);
+  // console.log("active: ", activeSample);
   //set new holdouts
   holdOuts.set(uuid, update.slice(-graphLength + 1));
 

@@ -53,9 +53,9 @@ export function DataStoreProvider(props: ParentProps) {
   const updateActiveSamples$ = server$(_updateActiveSamples);
   const addSample$ = server$(_addSample);
 
-  const pendingKeys = new Map<string, Date>();
+  const pendingKeys = new Map<string, number>();
 
-  const [startTime, resetStartTime] = createSignal(new Date().getTime());
+  const [startTime, resetStartTime] = createSignal(performance.now());
 
   const [dataStore, updateDataStore] = createStore<DataStoreContextProps>({
     input: {
@@ -81,7 +81,7 @@ export function DataStoreProvider(props: ParentProps) {
         } else if (validLetter(e)) {
           if (!dataStore.input.hasTyped) {
             updateDataStore("input", "hasTyped", true);
-            resetStartTime(new Date().getTime());
+            resetStartTime(performance.now());
           }
 
           addValidKey(e);
@@ -92,11 +92,11 @@ export function DataStoreProvider(props: ParentProps) {
         if (!dataStore.input.active) return;
         const pending = pendingKeys.get(e.key);
         if (!pending) return;
-        const keyDownTime = pending.getTime() - startTime();
+        const keyDownTime = pending - startTime();
         updateDataStore("data", "samples", dataStore.data.samples.length, [
           e.key,
           keyDownTime,
-          new Date().getTime() - startTime(),
+          performance.now() - startTime(),
         ]);
         pendingKeys.delete(e.key);
       },
@@ -123,10 +123,6 @@ export function DataStoreProvider(props: ParentProps) {
       },
     },
     sendResults() {
-      console.log({
-        testId: dataStore.data.testId,
-        name: dataStore.data.name,
-      });
       void addSample$(dataStore.data.testId, dataStore.data.name);
     },
   });
@@ -138,7 +134,6 @@ export function DataStoreProvider(props: ParentProps) {
     const res = await updateActiveSamples$(samples, dataStore.data.testId);
     // convert to Person[]
     let newRanks = res.map(([similarity, name]) => ({ name, similarity }) as Person);
-
     newRanks = newRanks.sort((a, b) => b.similarity - a.similarity);
     updateDataStore("compare", "persons", newRanks);
   }
@@ -149,12 +144,12 @@ export function DataStoreProvider(props: ParentProps) {
 
   function addValidKey(e: KeyboardEvent) {
     e.preventDefault();
-    pendingKeys.set(e.key, new Date());
+    pendingKeys.set(e.key, performance.now());
   }
 
   function updateWPM() {
     const typed = dataStore.input.typed;
-    const time = new Date().getTime() - startTime();
+    const time = performance.now() - startTime();
     const wpm = typed.length / 5 / (time / 1000 / 60);
     updateDataStore("input", "wpm", wpm);
   }

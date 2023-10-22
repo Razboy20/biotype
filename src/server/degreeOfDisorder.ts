@@ -1,8 +1,12 @@
-import type { Sample } from "@prisma/client/edge";
+import type { Graph, Sample } from "@prisma/client/edge";
 
-function degreeOfDisorder(arr1: Sample, arr2: Sample): number {
-  let sample1: string[] = arr1.graphs;
-  let sample2: string[] = arr2.graphs;
+export type GraphSample = Sample & {
+  graphs: Omit<Graph, "id">[];
+};
+
+function degreeOfDisorder(arr1: GraphSample, arr2: GraphSample): number {
+  let sample1: string[] = arr1.graphs.map((graph) => graph.value);
+  let sample2: string[] = arr2.graphs.map((graph) => graph.value);
 
   if (sample2.length > sample1.length) {
     const temp = sample1;
@@ -33,8 +37,10 @@ function degreeOfDisorder(arr1: Sample, arr2: Sample): number {
     if (i < sample2.length) {
       const arr = indicies.get(sample2[i]);
       if (arr != undefined) {
-        arr[1] = index2;
-        index2++;
+        if (arr[1] == -1) {
+          arr[1] = index2;
+          index2++;
+        }
       } else if (intersection.has(sample2[i])) {
         indicies.set(sample2[i], [-1, index2]);
         index2++;
@@ -42,8 +48,10 @@ function degreeOfDisorder(arr1: Sample, arr2: Sample): number {
     }
     const arr = indicies.get(sample1[i]);
     if (arr != undefined) {
-      arr[0] = index1;
-      index1++;
+      if (arr[0] == -1) {
+        arr[0] = index1;
+        index1++;
+      }
     } else if (intersection.has(sample1[i])) {
       indicies.set(sample1[i], [index1, -1]);
       index1++;
@@ -60,31 +68,35 @@ function degreeOfDisorder(arr1: Sample, arr2: Sample): number {
     }
   }
 
-  return (2 * disorder) / (intersection.size ** 2 - (intersection.size % 2));
+  if (intersection.size == 1) {
+    // don't divide by 0
+    return 1;
+  }
+  return disorder / ((intersection.size ** 2 - (intersection.size % 2)) / 2);
 }
 
-let S1: Sample = { graphs: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], userName: null, id: "1" };
-let S2: Sample = { graphs: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], userName: null, id: "1" };
+// let S1: Sample = { graphs: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], userName: null, id: "1" };
+// let S2: Sample = { graphs: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], userName: null, id: "1" };
 
-console.log(degreeOfDisorder(S1, S2));
+// console.log(degreeOfDisorder(S1, S2));
 
-S1 = { graphs: ["h", "w", "c", "q", "m"], userName: null, id: "1" };
-S2 = { graphs: ["c", "h", "m", "q", "w"], userName: null, id: "1" };
+// S1 = { graphs: ["h", "w", "c", "q", "m"], userName: null, id: "1" };
+// S2 = { graphs: ["c", "h", "m", "q", "w"], userName: null, id: "1" };
 
-console.log(degreeOfDisorder(S1, S2));
+// console.log(degreeOfDisorder(S1, S2));
 
-S1 = { graphs: ["ica", "mer", "ame", "eri", "ric"], userName: null, id: "1" };
-S2 = { graphs: ["mer", "ica", "ame", "ric", "eri"], userName: null, id: "1" };
+// S1 = { graphs: ["ica", "mer", "ame", "eri", "ric"], userName: null, id: "1" };
+// S2 = { graphs: ["mer", "ica", "ame", "ric", "eri"], userName: null, id: "1" };
 
-console.log(degreeOfDisorder(S1, S2));
+// console.log(degreeOfDisorder(S1, S2));
 
-S1 = { graphs: ["c", "b", "a"], userName: null, id: "1" };
-S2 = { graphs: ["a", "b", "c"], userName: null, id: "1" };
+// S1 = { graphs: ["c", "b", "a"], userName: null, id: "1" };
+// S2 = { graphs: ["a", "b", "c"], userName: null, id: "1" };
 
-console.log(degreeOfDisorder(S1, S2));
+// console.log(degreeOfDisorder(S1, S2));
 
-S1 = { graphs: [], userName: null, id: "1" };
-S2 = { graphs: ["mer", "ica", "ame", "ric", "eri"], userName: null, id: "1" };
+// S1 = { graphs: [], userName: null, id: "1" };
+// S2 = { graphs: ["mer", "ica", "ame", "ric", "eri"], userName: null, id: "1" };
 
-console.log(degreeOfDisorder(S1, S2));
+// console.log(degreeOfDisorder(S1, S2));
 export default degreeOfDisorder;

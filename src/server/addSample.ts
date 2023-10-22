@@ -1,4 +1,3 @@
-import type { Sample } from "@prisma/client/edge";
 import { prisma } from "./db";
 import degreeOfDisorder from "./degreeOfDisorder";
 import { makeSample } from "./makeSample";
@@ -6,18 +5,22 @@ import { activeSamples } from "./updateActiveSamples";
 
 export async function addSample(uuid: string, userId: string): Promise<boolean> {
   if (userId == "") return false;
-  console.log("userId:", userId);
+  // console.log("userId:", userId);
 
   const prospectiveSample = activeSamples.get(uuid);
 
   if (!prospectiveSample) return false;
-  const sample: Sample = makeSample(prospectiveSample);
+  const sample = makeSample(prospectiveSample);
   let user = await prisma.user.findUnique({
     where: {
       name: userId,
     },
     include: {
-      samples: true,
+      samples: {
+        include: {
+          graphs: true,
+        },
+      },
     },
   });
 
@@ -32,7 +35,11 @@ export async function addSample(uuid: string, userId: string): Promise<boolean> 
         },
       },
       include: {
-        samples: true,
+        samples: {
+          include: {
+            graphs: true,
+          },
+        },
       },
     });
   }
@@ -55,7 +62,17 @@ export async function addSample(uuid: string, userId: string): Promise<boolean> 
     },
     data: {
       samples: {
-        create: [sample],
+        create: [
+          {
+            graphs: {
+              create: prospectiveSample.map((graph) => {
+                return {
+                  value: graph[1],
+                };
+              }),
+            },
+          },
+        ],
       },
       variance: newVariance,
     },

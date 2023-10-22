@@ -10,7 +10,7 @@ import { ThemeControllerButton } from "./ThemeController";
 export default function Navbar() {
   const location = useLocation();
 
-  const routeLocations = ["/", "/help", "/about"];
+  const routeLocations = ["/", "/about"];
   const buttons: HTMLAnchorElement[] = [];
   const [linkContainer, setLinkContainer] = createSignal<HTMLDivElement>();
   const [indicatorEl, setIndicatorEl] = createSignal<HTMLDivElement>();
@@ -89,9 +89,6 @@ export default function Navbar() {
         >
           <A href="/" end activeClass={styles.active} ref={(e) => buttons.push(e)}>
             Type
-          </A>
-          <A href="/help" activeClass={styles.active} ref={(e) => buttons.push(e)}>
-            Help
           </A>
           <A href="/about" activeClass={styles.active} ref={(e) => buttons.push(e)}>
             About
