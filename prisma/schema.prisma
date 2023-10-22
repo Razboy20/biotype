@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  name     String   @id @map("_id")
+  variance Float
+  samples  Sample[]
+}
+
+model Sample {
+  graphs   String[]
+  User     User?    @relation(fields: [userName], references: [name])
+  userName String?
+  id       String   @id @default(uuid()) @map("_id")
+}
+
+model Computation {
+  id        String   @id @default(uuid()) @map("_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  inputs    Input[]
+  outputs   Output[]
+}
+
+model Input {
+  id            String       @id @default(uuid()) @map("_id")
+  computationId String?
+  Computation   Computation? @relation(fields: [computationId], references: [id])
+}
+
+model Output {
+  id            String      @id @default(uuid()) @map("_id")
+  computationId String
+  computation   Computation @relation(fields: [computationId], references: [id])
+}

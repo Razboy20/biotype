@@ -1,0 +1,35 @@
+.navbar_sizer {
+  @apply sticky top-0 z-10;
+}
+
+.navbar {
+  @apply w-full overflow-x-auto px-4 py-3 shadow bg-white dark:bg-neutral-800 transition-colors duration-100;
+  @apply flex items-center justify-center text-base font-semibold md:text-lg;
+
+  .title {
+    @apply flex-1 justify-self-start inline-flex items-center dark:text-white;
+  }
+
+  .links {
+    @apply relative flex w-fit gap-2;
+    a {
+      @apply btn-transition focusable inline-flex items-center rounded-md px-2 py-1 text-center text-neutral-500 outline-none dark:text-neutral-400;
+      @apply hover:bg-neutral-100/70 hover:text-gray-900 focus-visible:bg-neutral-100/80 focus-visible:text-gray-900 dark:hover:(bg-neutral-100/10 text-white) dark:focus-visible:(bg-neutral-100/10 text-white);
+      @apply relative after:absolute after:content-empty hover:after:opacity-30;
+      @apply active:scale-95;
+
+      &::after {
+        @apply bottom-0 left-0 right-0 h-1 rounded-full bg-neutral-500 opacity-0 transition duration-150;
+      }
+
+      &.active {
+        @apply text-neutral-900 after:opacity-0 dark:text-neutral-50;
+      }
+    }
+    &.loading {
+      a.active::after {
+        @apply bg-primary-400 dark:bg-primary-500 opacity-100 transition-none;
+      }
+    }
+  }
+}
