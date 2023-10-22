@@ -21,8 +21,8 @@ module.exports = {
     allowAutomaticSingleRunInference: true,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     tsconfigRootDir: __dirname,
-    project: ["./packages/*/tsconfig.json"],
-    // extraFileExtensions: [".json"],
+    project: ["./tsconfig.json"],
+    extraFileExtensions: [".json"],
   },
   plugins: ["@typescript-eslint", "solid", "prettier"],
   ignorePatterns: ["node_modules/**", "**/dist/**", "!**/.*", "pnpm-lock.yaml"],
@@ -76,6 +76,7 @@ module.exports = {
       },
     ],
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/unbound-method": "off",
     "solid/self-closing-comp": "off",
     "solid/jsx-no-undef": "off",
   },

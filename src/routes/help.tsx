@@ -2,7 +2,7 @@ import { type VoidComponent } from "solid-js";
 
 export const Help: VoidComponent = () => {
   return (
-    <main class="prose dark:prose-invert prose-neutral p-8">
+    <main class="p-8 prose prose-neutral dark:prose-invert">
       <div>bonk3</div>
     </main>
   );

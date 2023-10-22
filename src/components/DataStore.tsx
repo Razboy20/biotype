@@ -1,21 +1,26 @@
-import { ReactiveMap } from "@solid-primitives/map";
 import { createTimer } from "@solid-primitives/timer";
-import { createComputed, createContext, createSignal, useContext, type ParentProps } from "solid-js";
+import { nanoid } from "nanoid";
+import { createComputed, createContext, createEffect, createSignal, on, useContext, type ParentProps } from "solid-js";
 import { createStore } from "solid-js/store";
 import server$ from "solid-start/server";
 import { addSample as _addSample } from "~/server/addSample";
+import { updateActiveSamples as _updateActiveSamples } from "~/server/updateActiveSamples";
 
-const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
+const loremIpsum =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
 export interface Person {
   name: string;
   similarity: number;
 }
 
+const timeAlotted = 30;
+
 interface DataStoreContextProps {
   input: {
     text: string;
     typed: string[];
+    wpm: number;
     hasTyped: boolean;
     active: boolean;
     timeLeft: number;
@@ -25,11 +30,15 @@ interface DataStoreContextProps {
     restart(time?: number): void;
   };
   data: {
-    samples: [string, number, number];
+    testId: string;
+    samples: [string, number, number][];
+    name: string;
+    setName(name: string): void;
   };
   compare: {
     persons: Person[];
   };
+  sendResults(): void;
 }
 
 const DataStoreContext = createContext<DataStoreContextProps>();
@@ -41,9 +50,8 @@ export const useDataStore = () => {
 };
 
 export function DataStoreProvider(props: ParentProps) {
+  const updateActiveSamples$ = server$(_updateActiveSamples);
   const addSample$ = server$(_addSample);
-
-  const loaders = new ReactiveMap<string, boolean>();
 
   const pendingKeys = new Map<string, Date>();
 
@@ -53,17 +61,17 @@ export function DataStoreProvider(props: ParentProps) {
     input: {
       text: "",
       typed: [],
+      wpm: 0,
       hasTyped: false,
       active: false,
       timeLeft: 0,
       startTimer(length?: number) {
-        updateDataStore("input", "timeLeft", length ?? 10);
-        resetStartTime(new Date().getTime());
+        updateDataStore("input", "timeLeft", length ?? timeAlotted);
       },
       keyDown(e: KeyboardEvent) {
         if (e.key === "Enter") {
           e.preventDefault();
-          dataStore.input.restart(2);
+          dataStore.input.restart(timeAlotted);
           return;
         }
         if (!dataStore.input.active) return;
@@ -71,25 +79,35 @@ export function DataStoreProvider(props: ParentProps) {
           addValidKey(e);
           updateDataStore("input", "typed", (prev) => prev.slice(0, -1));
         } else if (validLetter(e)) {
+          if (!dataStore.input.hasTyped) {
+            updateDataStore("input", "hasTyped", true);
+            resetStartTime(new Date().getTime());
+          }
+
           addValidKey(e);
           updateDataStore("input", "typed", dataStore.input.typed.length, e.key);
-          updateDataStore("input", "hasTyped", true);
         }
       },
       keyUp(e: KeyboardEvent) {
         if (!dataStore.input.active) return;
         const pending = pendingKeys.get(e.key);
         if (!pending) return;
-        const time = startTime() - pending.getTime();
-        console.log("UP:", e.key, new Date().getTime() - startTime());
-        // updateDataStore("data", "samples", [...[e.key, 0, new Date().getTime() - startTime()]])
+        const keyDownTime = pending.getTime() - startTime();
+        updateDataStore("data", "samples", dataStore.data.samples.length, [
+          e.key,
+          keyDownTime,
+          new Date().getTime() - startTime(),
+        ]);
         pendingKeys.delete(e.key);
       },
-      restart(time: number = 10) {
+      restart(time: number = timeAlotted) {
         updateDataStore("input", "text", loremIpsum);
         updateDataStore("input", "typed", []);
         updateDataStore("input", "hasTyped", false);
         updateDataStore("input", "active", true);
+        updateDataStore("input", "wpm", 0);
+        updateDataStore("data", "testId", nanoid());
+        updateDataStore("data", "samples", []);
         dataStore.input.startTimer(time);
       },
     },
@@ -97,9 +115,33 @@ export function DataStoreProvider(props: ParentProps) {
       persons: [],
     },
     data: {
-      samples: ["", 0, 0],
+      testId: "DEFAULT",
+      samples: [],
+      name: "",
+      setName(name) {
+        updateDataStore("data", "name", name);
+      },
+    },
+    sendResults() {
+      console.log({
+        testId: dataStore.data.testId,
+        name: dataStore.data.name,
+      });
+      void addSample$(dataStore.data.testId, dataStore.data.name);
     },
   });
+
+  async function sendSamples() {
+    if (dataStore.data.samples.length === 0) return;
+    const samples = dataStore.data.samples;
+    updateDataStore("data", "samples", []);
+    const res = await updateActiveSamples$(samples, dataStore.data.testId);
+    // convert to Person[]
+    let newRanks = res.map(([similarity, name]) => ({ name, similarity }) as Person);
+
+    newRanks = newRanks.sort((a, b) => b.similarity - a.similarity);
+    updateDataStore("compare", "persons", newRanks);
+  }
 
   function validLetter(e: KeyboardEvent) {
     return e.key.length === 1 && e.metaKey === false && e.ctrlKey === false && e.altKey === false;
@@ -107,22 +149,48 @@ export function DataStoreProvider(props: ParentProps) {
 
   function addValidKey(e: KeyboardEvent) {
     e.preventDefault();
-    console.log("DOWN:", e.key, new Date().getTime() - startTime());
     pendingKeys.set(e.key, new Date());
+  }
+
+  function updateWPM() {
+    const typed = dataStore.input.typed;
+    const time = new Date().getTime() - startTime();
+    const wpm = typed.length / 5 / (time / 1000 / 60);
+    updateDataStore("input", "wpm", wpm);
   }
 
   // set active based on whether there is time left
   createComputed(() => {
     const active = dataStore.input.timeLeft > 0;
-    if (active !== dataStore.input.active) updateDataStore("input", "active", active);
+    if (active !== dataStore.input.active) {
+      updateDataStore("input", "active", active);
+    }
   });
 
+  // send samples every second, and update timeLeft
   createTimer(
     () => {
       updateDataStore("input", "timeLeft", dataStore.input.timeLeft - 1);
+      updateWPM();
+      void sendSamples();
     },
     () => dataStore.input.active && dataStore.input.hasTyped && 1000,
     setInterval,
+  );
+
+  // send rest of samples when test finishes
+  createEffect(
+    on(
+      () => dataStore.input.active,
+      () => {
+        if (!dataStore.input.active) return;
+        updateWPM();
+        void sendSamples();
+      },
+      {
+        defer: true,
+      },
+    ),
   );
 
   return <DataStoreContext.Provider value={dataStore}>{props.children}</DataStoreContext.Provider>;

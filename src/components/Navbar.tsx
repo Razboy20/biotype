@@ -2,6 +2,8 @@ import { createResizeObserver } from "@solid-primitives/resize-observer";
 import { createEffect, createMemo, createSignal, on, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { A, useLocation } from "solid-start";
+import logo from "~/assets/img/logo.svg";
+import { HelpTooltip } from "./HelpTooltip";
 import styles from "./Navbar.module.scss";
 import { ThemeControllerButton } from "./ThemeController";
 
@@ -73,8 +75,9 @@ export default function Navbar() {
       <div class={styles.navbar}>
         <div class={styles.title}>
           <A href="/" class="h-auto p-0 px-1.5 font-600 hover:bg-neutral-100/70 btn dark:hover:bg-neutral-100/10">
-            {/* <img src={logo} alt="Biotype logo" class="mr-2 h-8 w-8 rounded-md" /> */}
-            <span class="hidden xs:block">Biotype</span>
+            <img src={logo} alt="Biotype logo" class="mr-2 h-8 w-8 rounded-md" />
+            <span class="hidden xs:block">BioType</span>
+            <HelpTooltip tooltipText="Biometric Typing (BioType) identifier test" />
           </A>
         </div>
         <div

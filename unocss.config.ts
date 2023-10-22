@@ -2,7 +2,6 @@ import presetUno from "@unocss/preset-uno";
 import presetWebFonts from "@unocss/preset-web-fonts";
 import transformerDirectives from "@unocss/transformer-directives";
 import transformerVariantGroup from "@unocss/transformer-variant-group";
-import type { Preset } from "unocss";
 import { defineConfig, presetTypography } from "unocss";
 import { presetKobalte } from "unocss-preset-primitives";
 import { theme } from "unocss/preset-mini";
@@ -52,7 +51,7 @@ export default defineConfig({
 
   presets: [
     presetUno(),
-    presetKobalte() as Preset,
+    presetKobalte(),
     // presetRadix({
     //   palette: ["blue", "green", "red", "slate"],
     //   darkSelector: ".dark",
@@ -66,7 +65,7 @@ export default defineConfig({
       provider: "google",
       fonts: {
         sans: {
-          name: "Montserrat",
+          name: "Hanken Grotesk",
           weights: ["300", "400", "600", "700"],
           italic: true,
         },

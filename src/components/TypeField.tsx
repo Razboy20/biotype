@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { For, Show, VoidComponent, createEffect, createSignal, on } from "solid-js";
+import type { VoidComponent } from "solid-js";
+import { For, Show, createEffect, createSignal, on } from "solid-js";
 import { createStore } from "solid-js/store";
 import { css } from "solid-styled";
 import { useDataStore } from "./DataStore";
@@ -17,7 +18,7 @@ export const TypeField: VoidComponent<TypeFieldProps> = (props) => {
   const { input: store } = useDataStore();
 
   const Caret: VoidComponent<{ position: number }> = (props) => {
-    let x = () => {
+    const x = () => {
       const rootLeft = rootRef()?.getBoundingClientRect().left;
       if (!rootLeft) return 10;
 
@@ -29,7 +30,7 @@ export const TypeField: VoidComponent<TypeFieldProps> = (props) => {
       return el.left - rootLeft;
     };
 
-    let y = () => {
+    const y = () => {
       const rootTop = rootRef()?.getBoundingClientRect().top;
       if (!rootTop) return 10;
 
@@ -87,7 +88,7 @@ export const TypeField: VoidComponent<TypeFieldProps> = (props) => {
 
     return (
       <div
-        class="absolute w-3px h-8 bg-yellow-500 dark:bg-yellow-500 rounded-full transition ease-out-expo duration-75"
+        class="absolute h-8 w-3px rounded-full bg-yellow-500 transition duration-75 ease-out-expo dark:bg-yellow-500"
         classList={{
           "cursor-blink": isBlinking(),
         }}
@@ -136,7 +137,7 @@ export const TypeField: VoidComponent<TypeFieldProps> = (props) => {
         <For each={words()}>
           {(word) => (
             <div
-              class="relative block m-2.5"
+              class="relative m-2.5 block"
               classList={{
                 "after:(absolute top-4 -right-3.5 content-empty bg-error-400 dark:bg-error-500 h-2 w-2 rounded-full)":
                   store.typed.length > word.index + word.letters.length &&

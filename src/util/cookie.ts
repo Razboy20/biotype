@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Signal } from "solid-js";
 import { createEffect, createSignal } from "solid-js";
 import { isServer } from "solid-js/web";
@@ -36,17 +38,17 @@ export function createServerCookie<T>(
   options: ServerCookieOptions<T> & {
     deserialize: (str: string | undefined) => T;
     serialize: (value: T) => string;
-  }
+  },
 ): Signal<T>;
 export function createServerCookie(name: string, options?: ServerCookieOptions): Signal<string | undefined>;
 export function createServerCookie<T>(
   name: string,
-  options?: ServerCookieOptions<T | undefined>
+  options?: ServerCookieOptions<T | undefined>,
 ): Signal<T | undefined> {
   const { deserialize = (v: any) => v as T, serialize = String, cookieMaxAge = YEAR } = options ?? {};
 
   const [cookie, setCookie] = createSignal(
-    deserialize(parseCookie(isServer ? useRequest().request.headers.get("cookie") ?? "" : document.cookie)[name])
+    deserialize(parseCookie(isServer ? useRequest().request.headers.get("cookie") ?? "" : document.cookie)[name]),
   );
 
   createEffect((p) => {
@@ -75,7 +77,7 @@ export type UserThemeOptions = MaxAgeOptions & {
  */
 export function createUserTheme(
   name: string | undefined,
-  options: UserThemeOptions & { defaultValue: Theme }
+  options: UserThemeOptions & { defaultValue: Theme },
 ): Signal<Theme>;
 export function createUserTheme(name?: string, options?: UserThemeOptions): Signal<Theme | undefined>;
 export function createUserTheme(name = "theme", options?: UserThemeOptions): Signal<any> {

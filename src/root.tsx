@@ -8,25 +8,26 @@ import { Body, ErrorBoundary, FileRoutes, Head, Html, Link, Meta, Routes, Script
 import Navbar from "./components/Navbar";
 import { ThemeProvider } from "./components/ThemeController";
 
+import logo from "~/assets/img/logo.svg";
 // import favicon16Png from "~/assets/favicon/favicon-16x16.png?url";
 // import favicon32Png from "~/assets/favicon/favicon-32x32.png?url";
 // import favicon48Png from "~/assets/favicon/favicon-48x48.png?url";
-import appleTouchPng from "~/assets/favicon/apple-touch-icon.png?url";
+// import appleTouchPng from "~/assets/favicon/apple-touch-icon.png?url";
 import { DataStoreProvider } from "./components/DataStore";
 
 export default function Root() {
   return (
     <ThemeProvider>
       {(theme) => (
-        <Html lang="en" class="h-full" classList={{ dark: theme() === "dark" }}>
+        <Html lang="en" class="h-full font-sans" classList={{ dark: theme() === "dark" }}>
           <Head>
-            <Title>Biotype</Title>
+            <Title>BioType</Title>
             <Meta charset="utf-8" />
             <Meta name="viewport" content="width=device-width, initial-scale=1" />
             <Meta name="theme-color" content="#2463eb" />
-            <Meta name="description" content="Biotype" />
-            {/* <Link rel="icon" type="image/svg+xml" href={logo} /> */}
-            <Link rel="apple-touch-icon" href={appleTouchPng} />
+            <Meta name="description" content="BioType: A biometrically identifying typing test." />
+            <Link rel="icon" type="image/svg+xml" href={logo} />
+            {/* <Link rel="apple-touch-icon" href={appleTouchPng} /> */}
             {/* <Link rel="icon" type="image/x-icon" href={faviconIco} /> */}
             {/* <Link rel="icon" type="image/png" sizes="16x16" href={favicon16Png} />
             <Link rel="icon" type="image/png" sizes="32x32" href={favicon32Png} />

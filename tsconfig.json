@@ -26,6 +26,6 @@
     "src",
     ".eslintrc.cjs",
     "vite.config.ts",
-    "uno.config.ts"
+    "unocss.config.ts"
   ]
 }
