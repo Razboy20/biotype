@@ -67,7 +67,7 @@ const Type: VoidComponent = () => {
               fallback={<h3>Did not authenticate. Try adding more data.</h3>}
             >
               <h3 class="text-success-600 dark:text-success-500">
-                AUTHENTICATED: {authPerson()}, {store.compare.persons.find((p) => p.name == authPerson())!.similarity}
+                AUTHENTICATED: {authPerson()}, {store.compare.persons.find((p) => p.name == authPerson())?.similarity}
               </h3>
             </Show>
             <h3 class="mt-4">Save your results to database:</h3>
