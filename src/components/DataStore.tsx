@@ -4,6 +4,7 @@ import { createComputed, createContext, createEffect, createSignal, on, useConte
 import { createStore } from "solid-js/store";
 import server$ from "solid-start/server";
 import { addSample as _addSample } from "~/server/addSample";
+import { authenticate as _authenticate } from "~/server/authenticate";
 import { updateActiveSamples as _updateActiveSamples } from "~/server/updateActiveSamples";
 
 const loremIpsum =
@@ -14,7 +15,7 @@ export interface Person {
   similarity: number;
 }
 
-const timeAlotted = 30;
+const timeAlotted = 27;
 
 interface DataStoreContextProps {
   input: {
@@ -37,6 +38,7 @@ interface DataStoreContextProps {
   };
   compare: {
     persons: Person[];
+    authPerson?: string;
   };
   sendResults(): void;
 }
@@ -52,6 +54,7 @@ export const useDataStore = () => {
 export function DataStoreProvider(props: ParentProps) {
   const updateActiveSamples$ = server$(_updateActiveSamples);
   const addSample$ = server$(_addSample);
+  const authenticate$ = server$(_authenticate);
 
   const pendingKeys = new Map<string, number>();
 
@@ -162,12 +165,17 @@ export function DataStoreProvider(props: ParentProps) {
     }
   });
 
+  async function loop() {
+    updateWPM();
+    await sendSamples();
+    updateDataStore("compare", "authPerson", await authenticate$(dataStore.data.testId));
+  }
+
   // send samples every second, and update timeLeft
   createTimer(
     () => {
       updateDataStore("input", "timeLeft", dataStore.input.timeLeft - 1);
-      updateWPM();
-      void sendSamples();
+      void loop();
     },
     () => dataStore.input.active && dataStore.input.hasTyped && 1000,
     setInterval,
@@ -178,9 +186,8 @@ export function DataStoreProvider(props: ParentProps) {
     on(
       () => dataStore.input.active,
       () => {
-        if (!dataStore.input.active) return;
-        updateWPM();
-        void sendSamples();
+        if (dataStore.input.active) return;
+        void loop();
       },
       {
         defer: true,

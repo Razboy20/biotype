@@ -70,6 +70,11 @@ export default function Navbar() {
     updateIndicator(false);
   });
 
+  const [serverSide, setServerSide] = createSignal(true);
+  onMount(() => {
+    setServerSide(false);
+  });
+
   return (
     <nav class={styles.navbar_sizer}>
       <div class={styles.navbar}>
@@ -83,7 +88,7 @@ export default function Navbar() {
         <div
           class={styles.links}
           classList={{
-            [styles.loading]: isServer,
+            [styles.loading]: serverSide(),
           }}
           ref={setLinkContainer}
         >

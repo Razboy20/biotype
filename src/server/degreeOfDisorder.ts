@@ -28,6 +28,7 @@ function degreeOfDisorder(arr1: GraphSample, arr2: GraphSample): number {
 
   if (intersection.size == 0) return 1;
 
+  // console.log(intersection.size);
   const indicies = new Map<string, number[]>();
 
   let index1 = 0;

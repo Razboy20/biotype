@@ -4,35 +4,44 @@ import { makeSample } from "./makeSample";
 import meanDistance from "./meanDistance";
 import { activeSamples } from "./updateActiveSamples";
 
-export async function authenticate(uuid: string): Promise<string> {
+export async function authenticate(uuid: string): Promise<string | undefined> {
   const active = activeSamples.get(uuid);
 
   if (active) {
-    if (active.length < 20) return "";
+    if (active.length < 20) return;
     return authenticateBySample(makeSample(active));
   }
-  return "";
+  return;
 }
 
-async function authenticateBySample(sample: GraphSample): Promise<string> {
+let lastCall = 0;
+let usersCache: { name: string; variance: number; samples: GraphSample[] }[] = [];
+
+async function authenticateBySample(sample: GraphSample): Promise<string | undefined> {
   const k = 0.5;
-  const users = await prisma.user.findMany({
-    include: {
-      samples: {
-        include: {
-          graphs: true,
+
+  const currTime = Date.now();
+  if (usersCache.length == 0 || currTime - lastCall > 10000) {
+    usersCache = await prisma.user.findMany({
+      include: {
+        samples: {
+          include: {
+            graphs: true,
+          },
         },
       },
-    },
-  });
+    });
+
+    lastCall = currTime;
+  }
 
   let firstPlace = Number.MAX_VALUE;
   let firstPlaceUser = -1;
   let secondPlace = Number.MAX_VALUE;
   let secondPlaceUser = -1;
 
-  for (let i = 0; i < users.length; i++) {
-    const score = meanDistance(sample, users[i]);
+  for (let i = 0; i < usersCache.length; i++) {
+    const score = meanDistance(sample, usersCache[i]);
     if (score < firstPlace) {
       secondPlace = firstPlace;
       secondPlaceUser = firstPlaceUser;
@@ -45,7 +54,7 @@ async function authenticateBySample(sample: GraphSample): Promise<string> {
   }
 
   if (firstPlaceUser == -1) {
-    return "";
+    return;
   }
 
   if (secondPlaceUser == -1) {
@@ -53,9 +62,12 @@ async function authenticateBySample(sample: GraphSample): Promise<string> {
   }
 
   // console.log("places: ", firstPlace, secondPlace);
-  if (firstPlace < k * Math.abs(secondPlace - users[firstPlaceUser].variance) + users[firstPlaceUser].variance) {
-    return users[firstPlaceUser].name;
+  if (
+    firstPlace <
+    k * Math.abs(secondPlace - usersCache[firstPlaceUser].variance) + usersCache[firstPlaceUser].variance
+  ) {
+    return usersCache[firstPlaceUser].name;
   }
 
-  return "";
+  return;
 }

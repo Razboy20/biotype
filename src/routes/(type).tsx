@@ -1,12 +1,10 @@
 import { WindowEventListener } from "@solid-primitives/event-listener";
 import clsx from "clsx";
-import { Show, createEffect, createSignal, on, type VoidComponent } from "solid-js";
-import server$ from "solid-start/server";
+import { Show, type VoidComponent } from "solid-js";
 import { useDataStore } from "~/components/DataStore";
 import Matchbar from "~/components/Matchbar";
 import { TextInput } from "~/components/TextInput";
 import { TypeField } from "~/components/TypeField";
-import { authenticate } from "~/server/authenticate";
 
 // import "~/server/degreeOfDisorder";
 
@@ -14,22 +12,6 @@ const Type: VoidComponent = () => {
   const store = useDataStore();
 
   store.input.restart();
-
-  const authenticate$ = server$(authenticate);
-
-  const [authPerson, setAuthPerson] = createSignal<string>();
-
-  createEffect(
-    on(
-      () => store.input.timeLeft,
-      async () => {
-        setAuthPerson(await authenticate$(store.data.testId));
-      },
-      {
-        defer: true,
-      },
-    ),
-  );
 
   return (
     <main class="content-stretch w-full flex flex-grow flex-row items-center justify-center p-8">
@@ -63,11 +45,12 @@ const Type: VoidComponent = () => {
             <h1 class="text-2xl font-bold">{Math.round(store.input.typed.length)} TOTAL CHARS</h1>
             <h2 class="text-2xl font-bold">{Math.round(store.input.wpm)} WPM</h2>
             <Show
-              when={store.compare.persons[0] !== undefined && authPerson()}
+              when={store.compare.persons[0] !== undefined && store.compare.authPerson}
               fallback={<h3>Did not authenticate. Try adding more data.</h3>}
             >
               <h3 class="text-success-600 dark:text-success-500">
-                AUTHENTICATED: {authPerson()}, {store.compare.persons.find((p) => p.name == authPerson())?.similarity}
+                AUTHENTICATED: {store.compare.authPerson},{" "}
+                {store.compare.persons.find((p) => p.name == store.compare.authPerson)?.similarity}
               </h3>
             </Show>
             <h3 class="mt-4">Save your results to database:</h3>
