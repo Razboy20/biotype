@@ -15,7 +15,7 @@ export interface Person {
   similarity: number;
 }
 
-const timeAlotted = 27;
+const timeAlotted = 35;
 
 interface DataStoreContextProps {
   input: {
@@ -136,7 +136,7 @@ export function DataStoreProvider(props: ParentProps) {
     updateDataStore("data", "samples", []);
     const res = await updateActiveSamples$(samples, dataStore.data.testId);
     // convert to Person[]
-    let newRanks = res.map(([similarity, name]) => ({ name, similarity }) as Person);
+    let newRanks = res.map(([name, similarity]) => ({ name, similarity }) as Person);
     newRanks = newRanks.sort((a, b) => b.similarity - a.similarity);
     updateDataStore("compare", "persons", newRanks);
   }

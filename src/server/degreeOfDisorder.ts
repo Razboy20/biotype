@@ -8,6 +8,7 @@ function degreeOfDisorder(arr1: GraphSample, arr2: GraphSample): number {
   let sample1: string[] = arr1.graphs.map((graph) => graph.value);
   let sample2: string[] = arr2.graphs.map((graph) => graph.value);
 
+  // sample1 should be the longer than sample2
   if (sample2.length > sample1.length) {
     const temp = sample1;
     sample1 = sample2;
@@ -17,13 +18,22 @@ function degreeOfDisorder(arr1: GraphSample, arr2: GraphSample): number {
   const combination = new Set<string>();
   const intersection = new Set<string>();
 
-  for (let i = 0; i < sample1.length; i++) {
-    if (i < sample2.length) {
-      if (combination.has(sample2[i])) intersection.add(sample2[i]);
-      else combination.add(sample2[i]);
-    }
-    if (combination.has(sample1[i])) intersection.add(sample1[i]);
-    else combination.add(sample1[i]);
+  // for (let i = 0; i < sample1.length; i++) {
+  //   if (i < sample2.length) {
+  //     if (combination.has(sample2[i])) intersection.add(sample2[i]);
+  //     else combination.add(sample2[i]);
+  //   }
+  //   if (combination.has(sample1[i])) intersection.add(sample1[i]);
+  //   else combination.add(sample1[i]);
+  // }
+
+  for (const graph of sample1) {
+    combination.add(graph);
+  }
+
+  for (const graph of sample2) {
+    if (combination.has(graph)) intersection.add(graph);
+    else combination.add(graph);
   }
 
   if (intersection.size == 0) return 1;
