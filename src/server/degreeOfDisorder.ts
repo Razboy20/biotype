@@ -1,12 +1,8 @@
-import type { Graph, Sample } from "@prisma/client/edge";
+import type { ParsedSample } from "./db";
 
-export type GraphSample = Sample & {
-  graphs: Omit<Graph, "id">[];
-};
-
-function degreeOfDisorder(arr1: GraphSample, arr2: GraphSample): number {
-  let sample1: string[] = arr1.graphs.map((graph) => graph.value);
-  let sample2: string[] = arr2.graphs.map((graph) => graph.value);
+function degreeOfDisorder(arr1: ParsedSample, arr2: ParsedSample): number {
+  let sample1: string[] = arr1.graphs;
+  let sample2: string[] = arr2.graphs;
 
   // sample1 should be the longer than sample2
   if (sample2.length > sample1.length) {

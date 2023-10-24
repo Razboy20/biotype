@@ -15,7 +15,7 @@ export interface Person {
   similarity: number;
 }
 
-const timeAlotted = 35;
+const timeAlotted = 30;
 
 interface DataStoreContextProps {
   input: {
@@ -98,8 +98,8 @@ export function DataStoreProvider(props: ParentProps) {
         const keyDownTime = pending - startTime();
         updateDataStore("data", "samples", dataStore.data.samples.length, [
           e.key,
-          keyDownTime,
-          performance.now() - startTime(),
+          Math.round(keyDownTime * 100) / 100,
+          Math.round((performance.now() - startTime()) * 100) / 100,
         ]);
         pendingKeys.delete(e.key);
       },
@@ -133,7 +133,7 @@ export function DataStoreProvider(props: ParentProps) {
   async function sendSamples() {
     if (dataStore.data.samples.length === 0) return;
     const samples = dataStore.data.samples;
-    updateDataStore("data", "samples", []);
+    // updateDataStore("data", "samples", []);
     const res = await updateActiveSamples$(samples, dataStore.data.testId);
     // convert to Person[]
     let newRanks = res.map(([name, similarity]) => ({ name, similarity }) as Person);
@@ -168,7 +168,7 @@ export function DataStoreProvider(props: ParentProps) {
   async function loop() {
     updateWPM();
     await sendSamples();
-    updateDataStore("compare", "authPerson", await authenticate$(dataStore.data.testId));
+    updateDataStore("compare", "authPerson", await authenticate$(dataStore.data.testId, dataStore.data.samples));
   }
 
   // send samples every second, and update timeLeft

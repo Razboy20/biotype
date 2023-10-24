@@ -1,8 +1,7 @@
-import type { User } from "@prisma/client/edge";
-import type { GraphSample } from "./degreeOfDisorder";
+import type { FullUser, ParsedSample } from "./db";
 import degreeOfDisorder from "./degreeOfDisorder";
 
-function meanDistance(s: GraphSample, u: User & { samples: GraphSample[] }): number {
+function meanDistance(s: ParsedSample, u: FullUser): number {
   if (u.samples.length == 0) {
     return 1; // largest possible distance
   }

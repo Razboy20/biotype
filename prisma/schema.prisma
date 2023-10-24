@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
   // relationMode = "prisma"
 }
@@ -15,36 +15,24 @@ model User {
 }
 
 model Sample {
-  graphs   Graph[]
-  User     User?   @relation(fields: [userName], references: [name])
-  userName String?
-  id       String  @id @default(uuid()) @map("_id")
+  User            User              @relation(fields: [userName], references: [name])
+  userName        String
+  id              String            @id @default(uuid()) @map("_id")
+  GraphsOnSamples GraphsOnSamples[]
+
+  // @@index([userName])
 }
 
 model Graph {
-  // id       Int     @id @default(autoincrement())
-  id       String  @id @default(uuid()) @map("_id")
-  value    String
-  Sample   Sample? @relation(fields: [sampleId], references: [id])
-  sampleId String?
+  value           String            @id @unique @map("_id")
+  GraphsOnSamples GraphsOnSamples[]
 }
 
-model Computation {
-  id        String   @id @default(uuid()) @map("_id")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  inputs    Input[]
-  outputs   Output[]
-}
+model GraphsOnSamples {
+  sample   Sample @relation(fields: [sampleId], references: [id])
+  sampleId String
+  graph    Graph  @relation(fields: [graphId], references: [value])
+  graphId  String
 
-model Input {
-  id            String       @id @default(uuid()) @map("_id")
-  computationId String?
-  Computation   Computation? @relation(fields: [computationId], references: [id])
-}
-
-model Output {
-  id            String      @id @default(uuid()) @map("_id")
-  computationId String
-  computation   Computation @relation(fields: [computationId], references: [id])
+  @@id([sampleId, graphId])
 }

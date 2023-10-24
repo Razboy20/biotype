@@ -23,7 +23,7 @@ const Matchbar: VoidComponent<MatchbarProps> = (props) => {
               "text-success-600 dark:text-sucess-500": isAuthenticated(person.name),
             }}
           >
-            {person.name} <span class="font-bold">{person.similarity}%</span>
+            {person.name} <span class="font-bold">{Math.round(Math.sqrt(person.similarity / 100) * 1000) / 10}%</span>
           </div>
         )}
       </For>

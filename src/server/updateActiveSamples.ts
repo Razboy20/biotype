@@ -1,21 +1,16 @@
 import { rank } from "./rank";
 
-export const activeSamples = new Map<string, [number, string][]>();
-const holdOuts = new Map<string, [string, number, number][]>();
+export const activeSamples = new Map<string, [duration: number, graph: string][]>();
+// const holdOuts = new Map<string, [string, number, number][]>();
 
 const graphLength = 3;
 
-export async function updateActiveSamples(update: [string, number, number][], uuid: string) {
-  let activeSample = activeSamples.get(uuid);
-  if (!activeSample) {
-    activeSample = [];
-  }
-  let holdOut = holdOuts.get(uuid);
-  if (!holdOut) {
-    holdOut = [];
-  }
-
-  holdOut = holdOut.concat(update);
+export function updateActiveSamples(holdOut: [graph: string, startTime: number, endTime: number][], uuid: string) {
+  if (holdOut.length > 350) throw new Error("Too many samples");
+  // let activeSample = activeSamples.get(uuid);
+  // if (!activeSample) {
+  const activeSample: [duration: number, graph: string][] = [];
+  // }
 
   // console.log(holdOut);
   // execute backspaces
@@ -49,11 +44,8 @@ export async function updateActiveSamples(update: [string, number, number][], uu
   }
 
   activeSamples.set(uuid, activeSample);
-  // console.log("active: ", activeSample);
-  //set new holdouts
-  holdOuts.set(uuid, update.slice(-graphLength + 1));
 
-  return [...(await rank(uuid)).entries()];
+  return [...rank(uuid).entries()];
 }
 
 // updateActiveSamples(

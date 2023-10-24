@@ -44,13 +44,13 @@ const Type: VoidComponent = () => {
           <div class="absolute border-2 border-neutral-200 rounded-xl px-10 py-8 text-center text-xl text-neutral-900 shadow-xl backdrop-blur-md dark:border-neutral-700 dark:text-neutral-50">
             <h1 class="text-2xl font-bold">{Math.round(store.input.typed.length)} TOTAL CHARS</h1>
             <h2 class="text-2xl font-bold">{Math.round(store.input.wpm)} WPM</h2>
+            <hr class="my-2 border-neutral-400 dark:border-neutral-600" />
             <Show
               when={store.compare.persons[0] !== undefined && store.compare.authPerson}
               fallback={<h3>Did not authenticate. Try adding more data.</h3>}
             >
               <h3 class="text-success-600 dark:text-success-500">
-                AUTHENTICATED: {store.compare.authPerson},{" "}
-                {store.compare.persons.find((p) => p.name == store.compare.authPerson)?.similarity}
+                AUTHENTICATED as <span class="font-bold">{store.compare.authPerson}</span>
               </h3>
             </Show>
             <h3 class="mt-4">Save your results to database:</h3>
