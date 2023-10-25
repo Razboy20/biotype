@@ -21,7 +21,7 @@ export function authenticate(
 }
 
 function authenticateBySample(sample: ParsedSample): string | undefined {
-  const k = 0.5;
+  const k = 0.75;
   let firstPlace = Number.MAX_VALUE;
   let firstPlaceUser;
   let secondPlace = Number.MAX_VALUE;

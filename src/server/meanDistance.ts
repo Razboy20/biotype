@@ -19,7 +19,9 @@ function meanDistance(s: ParsedSample, u: FullUser): number {
   //   sum += degreeOfDisorder(s, u.samples[index]);
   // }
 
+  console.log("considering", u.name);
   const sum = u.samples.reduce((acc, curr) => acc + degreeOfDisorder(s, curr), 0);
+  console.log("sum:", sum);
   return sum / u.samples.length;
 
   // console.log("mean distance", sum / u.samples.length);

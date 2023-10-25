@@ -40,7 +40,8 @@ interface DataStoreContextProps {
     persons: Person[];
     authPerson?: string;
   };
-  sendResults(): void;
+  loading: boolean;
+  sendResults(): Promise<void>;
 }
 
 const DataStoreContext = createContext<DataStoreContextProps>();
@@ -78,6 +79,7 @@ export function DataStoreProvider(props: ParentProps) {
           return;
         }
         if (!dataStore.input.active) return;
+        if (e.repeat) return;
         if (e.key === "Backspace") {
           addValidKey(e);
           updateDataStore("input", "typed", (prev) => prev.slice(0, -1));
@@ -92,16 +94,29 @@ export function DataStoreProvider(props: ParentProps) {
         }
       },
       keyUp(e: KeyboardEvent) {
+        let key = e.key;
+
         if (!dataStore.input.active) return;
-        const pending = pendingKeys.get(e.key);
+        let pending = pendingKeys.get(key);
+        // try other case if not found
+        if (pending === undefined) {
+          if (key === key.toUpperCase()) {
+            key = key.toLowerCase();
+            pending = pendingKeys.get(key);
+          } else {
+            key = key.toUpperCase();
+            pending = pendingKeys.get(key);
+          }
+        }
+
         if (!pending) return;
         const keyDownTime = pending - startTime();
         updateDataStore("data", "samples", dataStore.data.samples.length, [
-          e.key,
+          key,
           Math.round(keyDownTime * 100) / 100,
           Math.round((performance.now() - startTime()) * 100) / 100,
         ]);
-        pendingKeys.delete(e.key);
+        pendingKeys.delete(key);
       },
       restart(time: number = timeAlotted) {
         updateDataStore("input", "text", loremIpsum);
@@ -125,8 +140,11 @@ export function DataStoreProvider(props: ParentProps) {
         updateDataStore("data", "name", name);
       },
     },
-    sendResults() {
-      void addSample$(dataStore.data.testId, dataStore.data.name);
+    loading: false,
+    async sendResults() {
+      updateDataStore("loading", true);
+      await addSample$(dataStore.data.testId, dataStore.data.name);
+      updateDataStore("loading", false);
     },
   });
 

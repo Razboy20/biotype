@@ -15,24 +15,18 @@ model User {
 }
 
 model Sample {
-  User            User              @relation(fields: [userName], references: [name])
-  userName        String
-  id              String            @id @default(uuid()) @map("_id")
-  GraphsOnSamples GraphsOnSamples[]
+  User     User    @relation(fields: [userName], references: [name])
+  userName String
+  id       String  @id @unique @default(uuid()) @map("_id")
+  graphs   Graph[]
 
   // @@index([userName])
 }
 
 model Graph {
-  value           String            @id @unique @map("_id")
-  GraphsOnSamples GraphsOnSamples[]
-}
-
-model GraphsOnSamples {
   sample   Sample @relation(fields: [sampleId], references: [id])
   sampleId String
-  graph    Graph  @relation(fields: [graphId], references: [value])
-  graphId  String
+  value    String
 
-  @@id([sampleId, graphId])
+  @@id([sampleId, value])
 }

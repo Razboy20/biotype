@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Show, type VoidComponent } from "solid-js";
 import { useDataStore } from "~/components/DataStore";
 import Matchbar from "~/components/Matchbar";
+import { FastSpinner } from "~/components/Spinner";
 import { TextInput } from "~/components/TextInput";
 import { TypeField } from "~/components/TypeField";
 
@@ -54,23 +55,27 @@ const Type: VoidComponent = () => {
               </h3>
             </Show>
             <h3 class="mt-4">Save your results to database:</h3>
-            <TextInput
-              type="text"
-              placeholder="Name"
-              class="mt-2"
-              value={store.data.name}
-              onChange={(e) => store.data.setName(e)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  if (store.data.name.length > 2) {
-                    store.sendResults();
-                    store.input.restart();
+            <div class="flex flex-row w-full gap-2 items-center">
+              <TextInput
+                type="text"
+                placeholder="Name"
+                class="mt-2 w-full"
+                value={store.data.name}
+                onChange={(e) => store.data.setName(e)}
+                disabled={store.loading}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    if (store.data.name.length > 2) {
+                      await store.sendResults();
+                      store.input.restart();
+                    }
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
                   }
-                  e.preventDefault();
-                  e.stopImmediatePropagation();
-                }
-              }}
-            />
+                }}
+              />
+              <FastSpinner class="absolute right-14 h-6 w-6" show={store.loading} />
+            </div>
           </div>
         </Show>
       </div>

@@ -9,7 +9,7 @@ interface TextInputProps extends Omit<TextFieldRootProps, "oninput"> {
   label?: string;
   type: "text" | "password" | "email" | "number";
   errorMessage?: string;
-  description?: string;
+  description?: JSX.Element;
   helpTooltip?: string;
   oninput?: JSX.ChangeEventHandler<HTMLInputElement, InputEvent>;
   step?: number | string;

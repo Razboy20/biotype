@@ -68,18 +68,9 @@ export async function updateUser(userId: string, variance: number, sample: Parse
     })
     .samples();
 
-  console.log(userSamples);
-
-  await prisma.graph.createMany({
+  return prisma.graph.createMany({
     data: sample.graphs.map((g) => ({
       value: g,
-    })),
-    skipDuplicates: true,
-  });
-
-  await prisma.graphsOnSamples.createMany({
-    data: sample.graphs.map((g) => ({
-      graphId: g,
       sampleId: newSampleId,
     })),
     skipDuplicates: true,
@@ -100,11 +91,7 @@ export async function getUser(userId: string): Promise<FullUser | undefined> {
     include: {
       samples: {
         include: {
-          GraphsOnSamples: {
-            include: {
-              graph: true,
-            },
-          },
+          graphs: true,
         },
       },
     },
@@ -114,7 +101,7 @@ export async function getUser(userId: string): Promise<FullUser | undefined> {
 
   const parsedUser = {
     ...user,
-    samples: user.samples.map((s) => ({ ...s, graphs: s.GraphsOnSamples.map((g) => g.graph.value) })),
+    samples: user.samples.map((s) => ({ ...s, graphs: s.graphs.map((g) => g.value) })),
   };
 
   // add to cache
@@ -128,11 +115,7 @@ async function loadUsers() {
     include: {
       samples: {
         include: {
-          GraphsOnSamples: {
-            include: {
-              graph: true,
-            },
-          },
+          graphs: true,
         },
       },
     },
@@ -141,7 +124,7 @@ async function loadUsers() {
   for (const user of users) {
     const parsedUser = {
       ...user,
-      samples: user.samples.map((s) => ({ ...s, graphs: s.GraphsOnSamples.map((g) => g.graph.value) })),
+      samples: user.samples.map((s) => ({ ...s, graphs: s.graphs.map((g) => g.value) })),
     };
 
     userCache.set(user.name, parsedUser);
